@@ -4,7 +4,7 @@
       class="searchbar-input"
       type="text"
       placeholder="Search products"
-      @input="debounceSearch"
+      @input="searchText"
     />
     <button class="searchbar-button" data-var="vsButton" aria-label="Search">
       <SearchIcon name="search" style="--width:24px; --height:24px" />
@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import SearchIcon from './Icon.vue'
 
 @Component({
@@ -21,11 +21,18 @@ import SearchIcon from './Icon.vue'
 })
 export default class ProductSearchbar extends Vue {
   debounce!: number
-  debounceSearch(event: Event) {
+  @Watch('searchText')
+  searchText(event: Event): void {
     const target = event.target as HTMLInputElement
+    if (target.value.toString().length > 1) {
+      this.debounceSearch(target.value)
+    }
+  }
+
+  debounceSearch(searchText: string) {
     clearTimeout(this.debounce)
     this.debounce = window.setTimeout(
-      () => this.$store.dispatch('handleSearchChange', target.value),
+      () => this.$store.dispatch('handleSearchChange', searchText),
       600
     )
   }
